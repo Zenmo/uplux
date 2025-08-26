@@ -1,1 +1,1 @@
-rootProject.name = "uplux-java"
+rootProject.name = "uplux"

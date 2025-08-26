@@ -7,6 +7,7 @@ import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.val;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
@@ -15,19 +16,19 @@ import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 @Builder(builderMethodName = "lombokBuilder", toBuilder = true)
-class UserScenarioRepository {
+public class UserScenarioRepository {
     protected @NonNull MinioClient minioClient;
     protected @NonNull String scenarioBucket;
     protected @NonNull String modelName;
     protected @NonNull UUID userId;
 
-    static Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 
     @Data
     @Accessors(fluent = true)
-    static class Builder {
+    public static class Builder {
         protected String minioEndpoint;
         protected String minioAccessKey;
         protected String minioSecretKey;
@@ -114,6 +115,10 @@ class UserScenarioRepository {
         } catch (Exception e) {
             throw new RuntimeException("Failed to load saved user scenario " + scenarioId, e);
         }
+    }
+
+    public ScenarioSummary saveUserScenario(String scenarioName, byte[] scenarioJson) {
+        return saveUserScenario(scenarioName, new ByteArrayInputStream(scenarioJson));
     }
 
     /**

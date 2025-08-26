@@ -1,10 +1,11 @@
 plugins {
     id("java")
     id("io.freefair.lombok") version "8.14.2"
+    id("com.gradleup.shadow") version "9.0.2"
 }
 
 group = "energy.lux.uplux"
-version = "1.0-SNAPSHOT"
+version = "1"
 
 repositories {
     mavenCentral()
@@ -25,4 +26,13 @@ java {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.shadowJar {
+    // remove "-all" from the jar file name
+    archiveClassifier.set("")
+
+    dependencies {
+        exclude(dependency("com.fasterxml.jackson.core:.*:.*"))
+    }
 }
