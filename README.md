@@ -95,3 +95,13 @@ Uplux currently does not verify that the user is authorized to access requested 
 
 It is up to the library consumer to ensure access control and protect against 
 user ID spoofing and ID guessing vulnerability.
+
+Building
+---
+
+Requires JDK 17. 
+
+```
+./gradlew shadowJar
+```
+ 

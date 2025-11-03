@@ -36,6 +36,8 @@ tasks.shadowJar {
     // remove "-all" from the jar file name
     archiveClassifier.set("")
 
+    minimize()
+
     dependencies {
         exclude(dependency("com.fasterxml.jackson.core:.*:.*"))
     }
