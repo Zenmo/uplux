@@ -72,7 +72,7 @@ public class UserScenarioRepository {
             if (accessKey == null) {
                 accessKey = System.getenv("UPLUX_ACCESS_KEY");
                 if (accessKey == null) {
-                    throw new RuntimeException("UPLUX_ACCESS_KEY environment variable not set");
+                    throw new UpluxException("UPLUX_ACCESS_KEY environment variable not set");
                 }
             }
 
@@ -80,7 +80,7 @@ public class UserScenarioRepository {
             if (secretKey == null) {
                 secretKey = System.getenv("UPLUX_SECRET_KEY");
                 if (secretKey == null) {
-                    throw new RuntimeException("UPLUX_SECRET_KEY environment variable not set");
+                    throw new UpluxException("UPLUX_SECRET_KEY environment variable not set");
                 }
             }
 
@@ -109,7 +109,7 @@ public class UserScenarioRepository {
                                 .createdAt(item.lastModified().toInstant())
                                 .build();
                     } catch (Exception e) {
-                        throw new RuntimeException("Failed to list saved user scenarios: " + e.getMessage(), e);
+                        throw UpluxException.create("Failed to list saved user scenarios: " + e.getMessage(), e);
                     }
                 })
                 .toList();
@@ -127,7 +127,7 @@ public class UserScenarioRepository {
                             .build()
             );
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load saved user scenario " + scenarioId, e);
+            throw UpluxException.create("Failed to load saved user scenario " + scenarioId, e);
         }
     }
 
@@ -163,7 +163,7 @@ public class UserScenarioRepository {
                     .createdAt(Instant.now())
                     .build();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to save user scenario " + scenarioName, e);
+            throw UpluxException.create("Failed to save user scenario " + scenarioName, e);
         }
     }
 
@@ -176,7 +176,7 @@ public class UserScenarioRepository {
                             .build()
             );
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load saved user scenario " + scenarioId, e);
+            throw UpluxException.create("Failed to load saved user scenario " + scenarioId, e);
         }
     }
 
