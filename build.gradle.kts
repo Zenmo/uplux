@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "energy.lux.uplux"
-version = "1"
+version = "2"
 
 repositories {
     mavenCentral()
@@ -13,6 +13,10 @@ repositories {
 
 dependencies {
     implementation("io.minio:minio:8.5.17")
+
+    // For verifying JWTs
+    implementation("com.nimbusds:nimbus-jose-jwt:10.5")
+    implementation("com.google.crypto.tink:tink:1.19.0")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

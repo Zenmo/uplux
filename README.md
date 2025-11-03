@@ -48,7 +48,8 @@ import energy.lux.uplux.UserScenarioRepository;
 import java.util.UUID;
 
 var repository = UserScenarioRepository.builder()
-        .userId(UUID.fromString("6b87f0f9-fdf6-4c05-9e0f-b75e46950113"))
+        // p_userIdToken is a model input parameter which is injected by the Lux.energy website
+        .userIdToken(p_userIdToken)
         .modelName("Mordor")
         .build();
 ```

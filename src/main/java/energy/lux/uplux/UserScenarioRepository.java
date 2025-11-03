@@ -35,14 +35,28 @@ public class UserScenarioRepository {
         protected String scenarioBucket = "user-scenarios";
         protected String modelName;
         protected UUID userId;
+        protected String userIdToken;
+        protected JWTDecoder jwtDecoder = new JWTDecoder();
 
         public UserScenarioRepository build() {
             return UserScenarioRepository.lombokBuilder()
                     .minioClient(buildMinioClient())
                     .scenarioBucket(scenarioBucket)
                     .modelName(modelName)
-                    .userId(userId)
+                    .userId(resolveUserId())
                     .build();
+        }
+
+        UUID resolveUserId() {
+            if (userId != null) {
+                return userId;
+            }
+
+            if (userIdToken == null) {
+                throw new UpluxException("Must supply either userId or userIdToken: both are null");
+            }
+
+            return jwtDecoder.jwtToUserId(userIdToken);
         }
 
         MinioClient buildMinioClient() {

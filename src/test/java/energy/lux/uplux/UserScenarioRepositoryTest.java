@@ -1,18 +1,31 @@
 package energy.lux.uplux;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.crypto.Ed25519Verifier;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.OctetKeyPair;
 import io.minio.*;
-import io.minio.errors.*;
 import lombok.val;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.Ed25519Signer;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+
+import java.time.Clock;
+import java.time.Duration;
+import java.util.Date;
 
 import java.io.IOException;
 import java.io.ByteArrayInputStream;
+import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
+
+import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 
 
 public class UserScenarioRepositoryTest {
@@ -45,6 +58,7 @@ public class UserScenarioRepositoryTest {
     }
 
     @BeforeEach
+    @AfterEach
     public void clearBucket() throws Exception {
         var minioClient = createMinioClient();
 
@@ -118,5 +132,67 @@ public class UserScenarioRepositoryTest {
         scenarios = repository.listUserScenarios();
         assertEquals(1, scenarios.size());
         assertEquals(scenario2Name, scenarios.get(0).getName());
+    }
+
+    /**
+     * Copied from <a href="https://connect2id.com/products/nimbus-jose-jwt/examples/jwt-with-eddsa">Example in documentation</a>
+     */
+    private OctetKeyPair generatePrivateJwk() throws JOSEException {
+        return new OctetKeyPairGenerator(Curve.Ed25519)
+                .keyUse(KeyUse.SIGNATURE)
+                .keyID("bestTestKey")
+                .generate();
+    }
+
+    /**
+     * Copied from <a href="https://connect2id.com/products/nimbus-jose-jwt/examples/jwt-with-eddsa">Example in documentation</a>
+     */
+    private String createIdToken(String userId, OctetKeyPair privateJwk) throws JOSEException {
+        val header = new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                .keyID(privateJwk.getKeyID())
+                .build();
+
+        val jwt = new SignedJWT(header, new JWTClaimsSet.Builder()
+                .subject(userId)
+                .expirationTime(Date.from(Clock.systemDefaultZone().instant().plus(Duration.ofHours(1))))
+                .build());
+
+        jwt.sign(new Ed25519Signer(privateJwk));
+
+        return jwt.serialize();
+    }
+
+    @Test
+    public void testRepositoryBuiltFromIdToken() throws JOSEException, IOException {
+        OctetKeyPair privateJwk = generatePrivateJwk();
+
+        val userId = "12345678-9abc-def0-1234-56789abcdef0";
+
+        val idToken = createIdToken(userId, privateJwk);
+
+        var scenarioName = "JWT Test Scenario";
+        var scenarioContent = """
+                {"test": "jwt-test"}
+                """;
+
+        // Save scenario using JWT repository
+        var jwtRepository = UserScenarioRepository.builder()
+                .jwtDecoder(new JWTDecoder(new Ed25519Verifier(privateJwk.toPublicJWK())))
+                .userIdToken(idToken)
+                .modelName("Mordor")
+                .scenarioBucket(BUCKET)
+                .build();
+
+        var summary = jwtRepository.saveUserScenario(scenarioName, new ByteArrayInputStream(scenarioContent.getBytes()));
+
+        // Load scenario using userId repository
+        var userIdRepository = UserScenarioRepository.builder()
+                .userId(UUID.fromString(userId))
+                .modelName("Mordor")
+                .scenarioBucket(BUCKET)
+                .build();
+
+        var loadedScenario = new String(userIdRepository.fetchUserScenarioContent(summary.getId()).readAllBytes());
+        assertEquals(scenarioContent, loadedScenario);
     }
 }
