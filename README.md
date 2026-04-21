@@ -1,12 +1,12 @@
 Uplux
 ===
 
-Save user-defined scenarios from AnyLogic.
+Save user-defined scenarios from AnyLogic in S3.
 
 Scope
 ---
 
-This is an internal library which mostly exists to bundle dependencies.
+This is an internal library for the [LUX Energy Twin](https://lux.energy) which mostly exists to bundle dependencies.
 
 Installation
 ---
@@ -95,6 +95,26 @@ Uplux currently does not verify that the user is authorized to access requested 
 
 It is up to the library consumer to ensure access control and protect against 
 user ID spoofing and ID guessing vulnerability.
+
+Temporary download link
+---
+
+A secondary functionality of this library is to generate a temporary download link.
+
+Example:
+
+```java
+import energy.lux.uplux.TemporaryFileRepository;
+import java.nio.file.Path;
+
+String url = TemporaryFileRepository
+        .builder()
+        .build()
+        .createTemporaryDownloadLink(Path.of("export.xlsx"));
+
+// Present it to the user in an AnyLogic agent:
+this.getExperimentHost().openWebSite(url);
+```
 
 Building
 ---

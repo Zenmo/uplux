@@ -32,7 +32,7 @@ public class UserScenarioRepositoryTest {
     protected static final String BUCKET = "test-user-scenarios";
 
     protected static MinioClient createMinioClient() {
-        return UserScenarioRepository.builder().buildMinioClient();
+        return MinioClientBuilder.builder().build().build();
     }
 
     protected static UserScenarioRepository createRepository() {

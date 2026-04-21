@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "energy.lux.uplux"
-version = "3"
+version = "4"
 
 repositories {
     mavenCentral()

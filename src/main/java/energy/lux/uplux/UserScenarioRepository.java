@@ -40,7 +40,12 @@ public class UserScenarioRepository {
 
         public UserScenarioRepository build() {
             return UserScenarioRepository.lombokBuilder()
-                    .minioClient(buildMinioClient())
+                    .minioClient(MinioClientBuilder.builder()
+                            .minioEndpoint(minioEndpoint)
+                            .minioAccessKey(minioAccessKey)
+                            .minioSecretKey(minioSecretKey)
+                            .build()
+                            .build())
                     .scenarioBucket(scenarioBucket)
                     .modelName(modelName)
                     .userId(resolveUserId())
@@ -57,37 +62,6 @@ public class UserScenarioRepository {
             }
 
             return jwtDecoder.jwtToUserId(userIdToken);
-        }
-
-        MinioClient buildMinioClient() {
-            var endpoint = minioEndpoint;
-            if (endpoint == null) {
-                endpoint = System.getenv("UPLUX_ENDPOINT");
-                if (endpoint == null) {
-                    endpoint = "https://minio.lux.energy";
-                }
-            }
-
-            var accessKey = minioAccessKey;
-            if (accessKey == null) {
-                accessKey = System.getenv("UPLUX_ACCESS_KEY");
-                if (accessKey == null) {
-                    throw new UpluxException("UPLUX_ACCESS_KEY environment variable not set");
-                }
-            }
-
-            var secretKey = minioSecretKey;
-            if (secretKey == null) {
-                secretKey = System.getenv("UPLUX_SECRET_KEY");
-                if (secretKey == null) {
-                    throw new UpluxException("UPLUX_SECRET_KEY environment variable not set");
-                }
-            }
-
-            return MinioClient.builder()
-                    .endpoint(endpoint)
-                    .credentials(accessKey, secretKey)
-                    .build();
         }
     }
 
