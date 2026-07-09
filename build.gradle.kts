@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "energy.lux.uplux"
-version = "4"
+version = "5"
 
 repositories {
     mavenCentral()
@@ -40,5 +40,7 @@ tasks.shadowJar {
 
     dependencies {
         exclude(dependency("com.fasterxml.jackson.core:.*:.*"))
+        // prevent conflict with different version of commons-io shipped with AnyLogic
+        relocate("org.apache", "energy.lux.shadow.org.apache")
     }
 }
