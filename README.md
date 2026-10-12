@@ -11,8 +11,28 @@ This is an internal library for the [LUX Energy Twin](https://lux.energy) which 
 Installation
 ---
 
-Download the [latest release](https://github.com/zenmo/uplux/releases)
-and add it to your AnyLogic project dependencies.
+The library is published to [GitHub Packages](https://github.com/zenmo/uplux/packages).
+Each [release](https://github.com/zenmo/uplux/releases) publishes a new version.
+
+Add the GitHub Packages repository (authentication with a token that has
+`read:packages` scope is required):
+
+```kotlin
+// settings.gradle.kts
+repositories {
+    maven {
+        url = uri("https://maven.pkg.github.com/zenmo/uplux")
+        credentials {
+            username = providers.environmentVariable("GITHUB_ACTOR").get()
+            password = providers.environmentVariable("GITHUB_TOKEN").get()
+        }
+    }
+}
+
+dependencies {
+    implementation("energy.lux:uplux:v6")
+}
+```
 
 Configuration
 ---
@@ -119,9 +139,20 @@ this.getExperimentHost().openWebSite(url);
 Building
 ---
 
-Requires JDK 17. 
+Requires JDK 17.
 
 ```
-./gradlew shadowJar
+./gradlew build
+```
+
+Releasing
+---
+
+Push a tag (e.g. `v5`) or publish a GitHub release.
+The `publish` workflow then publishes the library to GitHub Packages with
+`VERSION_TAG` set to the tag name:
+
+```
+VERSION_TAG=v5 GITHUB_ACTOR=<user> GITHUB_TOKEN=<token> ./gradlew publish
 ```
  

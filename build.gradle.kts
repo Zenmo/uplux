@@ -1,11 +1,13 @@
+import java.net.URI
+
 plugins {
     id("java")
     id("io.freefair.lombok") version "8.14.2"
-    id("com.gradleup.shadow") version "9.0.2"
+    `maven-publish`
 }
 
-group = "energy.lux.uplux"
-version = "5"
+group = "energy.lux"
+version = System.getenv("VERSION_TAG") ?: "dev"
 
 repositories {
     mavenCentral()
@@ -26,21 +28,31 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+    withSourcesJar()
 }
 
 tasks.test {
     useJUnitPlatform()
 }
 
-tasks.shadowJar {
-    // remove "-all" from the jar file name
-    archiveClassifier.set("")
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "energy.lux"
+            artifactId = "uplux"
+            version = System.getenv("VERSION_TAG") ?: "dev"
 
-    minimize()
-
-    dependencies {
-        exclude(dependency("com.fasterxml.jackson.core:.*:.*"))
-        // prevent conflict with different version of commons-io shipped with AnyLogic
-        relocate("org.apache", "energy.lux.shadow.org.apache")
+            from(components["java"])
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = URI("https://maven.pkg.github.com/zenmo/uplux")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
     }
 }
